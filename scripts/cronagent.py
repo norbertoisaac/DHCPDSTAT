@@ -20,6 +20,10 @@ try:
   httpConn.request('POST',conf.postServerScript,post,headers)
   response = httpConn.getresponse()
   responseData = response.read()
+  if not response.status == 200:
+    logF = open(conf.logDir+now.strftime("error-%Y%m%d.log"),'a')
+    logD.write(now.isoformat()+','+str(response.status)+','+response.reason)
+    logF.close()
 except:
   pass
 httpConn.close()
