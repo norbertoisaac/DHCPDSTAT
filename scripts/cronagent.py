@@ -22,7 +22,7 @@ try:
   responseData = response.read()
   if not response.status == 200:
     logF = open(conf.logDir+now.strftime("error-%Y%m%d.log"),'a')
-    logD.write(now.isoformat()+','+str(response.status)+','+response.reason)
+    logF.write(now.isoformat()+','+str(response.status)+','+response.reason+'\n')
     logF.close()
 except:
   pass
