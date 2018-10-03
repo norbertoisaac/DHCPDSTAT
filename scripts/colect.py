@@ -75,14 +75,3 @@ def getStats(leases,subnets):
 	  break
   return stats
 
-import sys
-sys.path.insert(0, '/var/lib/dhcpdstat/conf/')
-import conf
-now = datetime.datetime.now()
-subnets = getBlocks(conf.dhcpdConf)
-leases = getLeases(conf.leasesDb)
-stats = getStats(leases,subnets)
-import socket
-hn = socket.gethostname()
-post = {'hn':hn,'tst':now.isoformat(),'stats':stats}
-print post
