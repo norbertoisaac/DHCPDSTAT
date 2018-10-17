@@ -116,7 +116,7 @@ body = '''<!DOCTYPE html>
         <option value="sqltpl">SQL templates</option>
         <option value="counters">Counters</option>
       </select>-->
-      <a class="menu" href="mailto:nunezno@personal.com.py" style="float:right;display:block;padding:5px 15px 5px 15px;text-decoration:none;letter-spacing:1px;font-size:17px;color:#f1f1f1;border:none;">Soporte: Norberto N./SVA</a>
+      <a class="menu" href="mailto:" style="float:right;display:block;padding:5px 15px 5px 15px;text-decoration:none;letter-spacing:1px;font-size:17px;color:#f1f1f1;border:none;">Soporte: Norberto N./SVA</a>
     </div>
     <img src="data:image/png;base64,'''+base64.b64encode(f.read())+'''" />
   </body>
