@@ -5,8 +5,11 @@ import graph
 import dbconn
 import base64
 conn,cur = dbconn.getDbConn()
-fname = graph.graph_actives(conn, cur, 'ddnsftth1', 'png')
-f = open(fname,'rb')
+form = cgi.FieldStorage()
+if 'menu' in form:
+  menu = form.getvalue('menu')
+else:
+  menu = 'charts'
 body = '''<!DOCTYPE html>
 <html>
   <head>
@@ -74,6 +77,9 @@ body = '''<!DOCTYPE html>
     a.menu:hover{
       background-color:black;
     }
+    a.submenu:hover{
+      background-color:#efefef;
+    }
     div.popupdiv {
       left: 0px;
       top: 0px;
@@ -107,7 +113,7 @@ body = '''<!DOCTYPE html>
     </div>
     <!-- MENU -->
     <div style="background-color:#5f5f5f;height:30px">
-      <!-- <a class="menu" href="?menu=charts" style="float:left;display:block;padding:5px 15px 5px 15px;text-decoration:none;letter-spacing:1px;font-size:17px;color:#f1f1f1;border:none;">CHARTS</a> -->
+      <a class="menu" href="?menu=charts" style="float:left;display:block;padding:5px 15px 5px 15px;text-decoration:none;letter-spacing:1px;font-size:17px;color:#f1f1f1;border:none;">CHARTS</a>
       <!-- <a class="menu" href="?menu=devices" style="float:left;display:block;padding:5px 15px 5px 15px;text-decoration:none;letter-spacing:1px;font-size:17px;color:#f1f1f1;border:none;">DEVICES</a> -->
       <!-- <a class="menu" href="?menu=sqltpl" style="float:left;display:block;padding:5px 15px 5px 15px;text-decoration:none;letter-spacing:1px;font-size:17px;color:#f1f1f1;border:none;">QUERY TEMPLATES</a> -->
       <!-- <select style="height:100%;background-color:gray;" form="formsubg" name="menu" onchange="selectsubg()">
@@ -116,12 +122,55 @@ body = '''<!DOCTYPE html>
         <option value="sqltpl">SQL templates</option>
         <option value="counters">Counters</option>
       </select>-->
-      <a class="menu" href="mailto:" style="float:right;display:block;padding:5px 15px 5px 15px;text-decoration:none;letter-spacing:1px;font-size:17px;color:#f1f1f1;border:none;">Soporte: Norberto N./SVA</a>
+      <a class="menu" href="mailto:" style="float:right;display:block;padding:5px 15px 5px 15px;text-decoration:none;letter-spacing:1px;font-size:17px;color:#f1f1f1;border:none;">Soporte: </a>
     </div>
-    <img src="data:image/png;base64,'''+base64.b64encode(f.read())+'''" />
-  </body>
-</html>'''
-f.close()
+  </div>'''
+# Sub menu
+if menu == 'charts':
+  body += '''<!-- CHARTS Sub MENU -->
+    <div style="background-color:#d4d6d5;height:20px;position:fixed;top:100px;width:100%">
+      <a class="submenu" href="?menu=charts&submenu=byserver" style="float:left;display:block;padding:5px 15px 5px 15px;text-decoration:none;letter-spacing:1px;font-size:10px;color:#2d2d2d;border:none;">By DHCP server</a>
+      <a class="submenu" href="?menu=charts&submenu=byipblock" style="float:left;display:block;padding:5px 15px 5px 15px;text-decoration:none;letter-spacing:1px;font-size:10px;color:#2d2d2d;border:none;">By IP block</a>
+      <a class="submenu" href="?menu=charts&submenu=bycpemac" style="float:left;display:block;padding:5px 15px 5px 15px;text-decoration:none;letter-spacing:1px;font-size:10px;color:#2d2d2d;border:none;">By CPE MAC address</a>
+      <!-- <select style="height:100%;background-color:gray;" form="formsubg" name="menu" onchange="selectsubg()">
+        <option >Charts</option>
+        <option value="views">Views</option>
+        <option value="sqltpl">SQL templates</option>
+        <option value="counters">Counters</option>
+      </select>-->
+    </div>'''
+# Content
+if menu=='charts':
+  body += '<div style="position:fixed;top:120px;width:100%;bottom:0px;overflow-y:auto;">'
+  if 'submenu' in form:
+    submenu = form.getvalue('submenu')
+  else:
+    submenu = 'byserver'
+  if submenu=='byserver':
+    fname = graph.graph_actives(conn, cur, 'ddnsftth1', 'png')
+    f = open(fname,'rb')
+    body += '<img src="data:image/png;base64,'+base64.b64encode(f.read())+'" />'
+    f.close()
+  if submenu=='byipblock':
+    ipblocks = graph.getipblocks(conn,cur)
+    for ipblock in ipblocks:
+      fname = graph.graph_ipblock(conn,cur,ipblock,'png')
+      f = open(fname,'rb')
+      body += '<img src="data:image/png;base64,'+base64.b64encode(f.read())+'" />'
+      f.close()
+  if submenu=='bycpemac':
+    cpemacs = graph.getcpemac(conn,cur)
+    for cpemac in cpemacs:
+      fname = graph.graph_cpemac(conn,cur,cpemac,'png')
+      f = open(fname,'rb')
+      body += '<img src="data:image/png;base64,'+base64.b64encode(f.read())+'" />'
+      f.close()
+    #fname = graph.graph_actives(conn, cur, 'ddnsftth1', 'png')
+    #f = open(fname,'rb')
+    #body += '<img src="data:image/png;base64,'+base64.b64encode(f.read())+'" />'
+    #f.close()
+  body += '</div>'
+body += '</body></html>'
 headers = 'Content-Type: text/html; charset=utf-8\r\n'
 headers += "Content-Length: "+str(len(body))+"\r\n\r\n"
 sys.stdout.write(headers+body)
